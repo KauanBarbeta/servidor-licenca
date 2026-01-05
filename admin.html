@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Admin</title>
+</head>
+<body>
+  <h2>Painel de Clientes</h2>
+
+  <input id="token" placeholder="Token admin" />
+  <button onclick="carregar()">Entrar</button>
+
+  <ul id="lista"></ul>
+
+  <script>
+    const URL = "https://servidor-licenca-1.onrender.com";
+
+    function carregar() {
+      const token = document.getElementById("token").value;
+
+      fetch(`${URL}/admin/clientes?token=${token}`)
+        .then(r => r.json())
+        .then(data => {
+          const ul = document.getElementById("lista");
+          ul.innerHTML = "";
+
+          for (let id in data) {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              ${id} - ${data[id].ativo ? "ATIVO" : "BLOQUEADO"}
+              <button onclick="toggle('${id}', '${token}')">Alterar</button>
+            `;
+            ul.appendChild(li);
+          }
+        });
+    }
+
+    function toggle(id, token) {
+      fetch(`${URL}/admin/toggle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, token })
+      })
+      .then(() => carregar());
+    }
+  </script>
+</body>
+</html>
