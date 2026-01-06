@@ -1,48 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Painel Admin</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #2f2f2f;
+      color: #fff;
+    }
+
+    header {
+      background: #1e1e1e;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      margin-top: 60px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .box {
+      background: #3a3a3a;
+      padding: 30px;
+      border-radius: 8px;
+      width: 320px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background: #4caf50;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #43a047;
+    }
+
+    .status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .painel {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
-  <h2>Painel de Clientes</h2>
 
-  <input id="token" placeholder="Token admin" />
-  <button onclick="carregar()">Entrar</button>
+<header>Painel de Administração</header>
 
-  <ul id="lista"></ul>
+<div class="container">
+  <div class="box">
+    <label>Token de Acesso</label>
+    <input type="password" id="token" placeholder="Digite o token">
+    <button onclick="entrar()">Entrar</button>
 
-  <script>
-    const URL = "https://servidor-licenca-1.onrender.com";
+    <div class="status" id="status"></div>
 
-    function carregar() {
-      const token = document.getElementById("token").value;
+    <div class="painel" id="painel">
+      <p>✅ Acesso autorizado</p>
+      <p>Servidor ativo</p>
+    </div>
+  </div>
+</div>
 
-      fetch(`${URL}/admin/clientes?token=${token}`)
-        .then(r => r.json())
-        .then(data => {
-          const ul = document.getElementById("lista");
-          ul.innerHTML = "";
+<script>
+function entrar() {
+  const token = document.getElementById("token").value;
+  const status = document.getElementById("status");
+  const painel = document.getElementById("painel");
 
-          for (let id in data) {
-            const li = document.createElement("li");
-            li.innerHTML = `
-              ${id} - ${data[id].ativo ? "ATIVO" : "BLOQUEADO"}
-              <button onclick="toggle('${id}', '${token}')">Alterar</button>
-            `;
-            ul.appendChild(li);
-          }
-        });
-    }
+  status.innerText = "Verificando...";
+  painel.style.display = "none";
 
-    function toggle(id, token) {
-      fetch(`${URL}/admin/toggle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, token })
-      })
-      .then(() => carregar());
-    }
-  </script>
+  fetch("https://servidor-licenca-1.onrender.com/status?token=" + token)
+    .then(response => response.json())
+    .then(data => {
+      if (data.ativo === true) {
+        status.innerText = "";
+        painel.style.display = "block";
+      } else {
+        status.innerText = "❌ Token inválido ou servidor offline";
+      }
+    })
+    .catch(() => {
+      status.innerText = "❌ Erro ao conectar ao servidor";
+    });
+}
+</script>
+
 </body>
 </html>
